@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Scramble - 목적격 관계대명사</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col items-center p-4">
 
-    <!-- 1. 로그인 모달 -->
+    <!-- 로그인 모달 -->
     <div id="login-modal" class="modal active">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl text-center border border-slate-100">
             <div class="mb-6">
@@ -40,6 +40,20 @@
                 class="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 mb-4 outline-none focus:ring-4 focus:ring-indigo-500/20 text-center font-bold text-lg"
             >
 
+            <div class="mb-4 text-left">
+                <label class="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
+                    <input type="checkbox" id="teacher-check" class="w-4 h-4">
+                    교사로 로그인
+                </label>
+            </div>
+
+            <input
+                type="password"
+                id="teacher-password"
+                placeholder="교사 비밀번호"
+                class="hidden w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 mb-4 outline-none focus:ring-4 focus:ring-indigo-500/20 text-center font-bold text-lg"
+            >
+
             <button
                 id="start-btn"
                 class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 active:scale-95"
@@ -51,7 +65,7 @@
         </div>
     </div>
 
-    <!-- 2. 상단 네비게이션 -->
+    <!-- 상단 네비게이션 -->
     <nav class="w-full max-w-2xl flex justify-between items-center mb-6 py-2 px-4">
         <div class="flex items-center gap-3">
             <div id="user-avatar" class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black shadow-lg">?</div>
@@ -66,11 +80,11 @@
 
         <div class="flex gap-2.5">
             <button id="rank-btn" class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-all">🏆 순위표</button>
-            <button id="admin-btn" class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-all">⚙️</button>
+            <button id="admin-btn" class="hidden p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-all">⚙️ 관리</button>
         </div>
     </nav>
 
-    <!-- 3. 메인 게임 영역 -->
+    <!-- 메인 게임 -->
     <main id="game-container" class="w-full max-w-2xl bg-white dark:bg-slate-800 shadow-2xl rounded-[3rem] p-8 md:p-12 transition-all border border-slate-100 dark:border-slate-700 relative overflow-hidden">
         <div class="flex justify-between items-start mb-8">
             <div class="flex-1">
@@ -86,6 +100,11 @@
 
         <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full mb-10 overflow-hidden">
             <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-600 h-full w-0 transition-all duration-700 ease-out"></div>
+        </div>
+
+        <div class="mb-6 flex gap-3">
+            <button id="load-all-btn" class="px-4 py-3 rounded-2xl bg-indigo-600 text-white font-black hover:bg-indigo-700 transition-all">전체 문장</button>
+            <button id="load-my-btn" class="px-4 py-3 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all">내 문장</button>
         </div>
 
         <div class="mb-8">
@@ -110,7 +129,7 @@
         <div id="feedback" class="mt-8 text-center font-black text-xl opacity-0 transition-all h-8">정답입니다!</div>
     </main>
 
-    <!-- 4. 순위표 모달 -->
+    <!-- 순위표 -->
     <div id="rank-modal" class="modal">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative">
             <button id="rank-close" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500 hover:bg-slate-200">&times;</button>
@@ -121,9 +140,9 @@
         </div>
     </div>
 
-    <!-- 5. 관리자/AI 생성 모달 -->
+    <!-- 관리자/AI 생성 모달 -->
     <div id="admin-modal" class="modal">
-        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[2.5rem] p-10 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-3xl rounded-[2.5rem] p-10 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-8">
                 <h3 class="text-2xl font-black dark:text-white">AI 문장 생성 & 관리</h3>
                 <button id="admin-close" class="text-2xl text-slate-400">&times;</button>
@@ -135,22 +154,39 @@
                     <input
                         type="text"
                         id="ai-prompt"
-                        placeholder="예: 목적격 관계대명사가 포함된 우주 테마 문장 5개"
+                        placeholder="예: 목적격 관계대명사가 포함된 환경 보호 테마 문장 5개"
                         class="flex-1 p-4 rounded-2xl border-none shadow-inner dark:bg-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                     <button id="generate-ai-btn" class="px-8 bg-indigo-600 text-white rounded-2xl font-black hover:bg-indigo-700 disabled:opacity-50">생성</button>
                 </div>
+                <p class="mt-3 text-xs text-slate-500">생성된 문장은 전체 문장 목록과 내 문장 목록에 함께 저장됩니다.</p>
+            </div>
+
+            <div class="mb-4 flex gap-3">
+                <button id="admin-show-all-btn" class="px-4 py-3 rounded-2xl bg-indigo-600 text-white font-black hover:bg-indigo-700 transition-all">전체 문장 관리</button>
+                <button id="admin-show-my-btn" class="px-4 py-3 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all">내 문장 관리</button>
             </div>
 
             <div id="admin-quiz-list" class="space-y-3"></div>
         </div>
     </div>
 
-    <!-- Firebase 및 로직 스크립트 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, updateDoc, increment, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            collection,
+            onSnapshot,
+            updateDoc,
+            increment,
+            deleteDoc,
+            writeBatch,
+            query,
+            orderBy
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAb7AuYs6vep8btqXXrEdGleqpoAd1YwUQ",
@@ -159,49 +195,145 @@
   	    storageBucket: "english-scramble-a050d.firebasestorage.app",
   	    messagingSenderId: "964570654173",
             appId: "1:964570654173:web:8b531e8daad7d216528234",
-            measurementId: "G-8YQNVVXSJP"
+            measurementId: "G-8YQNVVXSJP"Z"
         };
 
         const GEMINI_API_KEY = "AIzaSyCvU-VPmaPVPgADqvHLZG8AyADoJdQQ2Q8";
 
+        /* 교사용 비밀번호 */
+        const TEACHER_PASSWORD = "1234";
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = 'scramble-pro-v3';
+        const appId = "scramble-pro-v3";
 
-        let quizzes = [
-            { en: "Gazzaniga then asked participants why they chose the card that they did", ko: "Gazzaniga는 그다음 참가자들에게 왜 그들이 그 카드를 선택했는지를 물었다." },
-            { en: "the tariff that protects steelworkers raises the price of the steel that domestic automobile makers need to build their cars", ko: "철강 노동자를 보호하는 관세는 국내 자동차 제조업체들이 자동차를 만들기 위해 필요한 철강의 가격을 상승시킨다." },
-            { en: "our brains experience a sense of reward when we create something new in the process of exploring something uncertain, such as a musical phrase that we have never played or heard before", ko: "우리의 뇌는 한 번도 연주하거나 들어본 적 없는 음악 구절처럼, 불확실한 것을 탐색하는 과정에서 새로운 무언가를 만들어낼 때 보상의 감각을 경험한다." },
-            { en: "mental development consists of individuals increasingly mastering social codes and signals themselves, which they can master only in social situations with the support of more competent individuals, typically adults", ko: "정신 발달이란 개인이 사회적 규범과 신호를 점점 더 스스로 습득해 가는 과정이며, 이러한 것들은 보통 성인과 같은 더 유능한 사람들의 도움을 받는 사회적 상황에서만 습득할 수 있다." },
-            { en: "by clarifying the nature of the old and new perspectives, and by identifying actions on which we might cooperate to move the process along, we can help accelerate the shift", ko: "기존 관점과 새로운 관점의 성격을 분명히 하고, 그 과정을 진전시키기 위해 우리가 협력할 수 있는 행동들을 찾아낸다면, 우리는 그 전환을 가속화하는 데 도움을 줄 수 있다." }
-        ];
-
+        let publicQuizzes = [];
+        let myQuizzes = [];
+        let quizzes = [];
         let currentIdx = 0;
         let selectedWords = [];
         let currentUser = null;
+        let currentMode = "all";
+        let adminViewMode = "all";
+        let isTeacher = false;
+
+        const defaultQuizzes = [
+            { en: "Gazzaniga then asked participants why they chose the card that they did", ko: "Gazzaniga는 그다음 참가자들에게 왜 그들이 그 카드를 선택했는지를 물었다.", source: "default" },
+            { en: "the tariff that protects steelworkers raises the price of the steel that domestic automobile makers need to build their cars", ko: "철강 노동자를 보호하는 관세는 국내 자동차 제조업체들이 자동차를 만들기 위해 필요한 철강의 가격을 상승시킨다.", source: "default" },
+            { en: "our brains experience a sense of reward when we create something new in the process of exploring something uncertain, such as a musical phrase that we have never played or heard before", ko: "우리의 뇌는 한 번도 연주하거나 들어본 적 없는 음악 구절처럼, 불확실한 것을 탐색하는 과정에서 새로운 무언가를 만들어낼 때 보상의 감각을 경험한다.", source: "default" },
+            { en: "mental development consists of individuals increasingly mastering social codes and signals themselves, which they can master only in social situations with the support of more competent individuals, typically adults", ko: "정신 발달이란 개인이 사회적 규범과 신호를 점점 더 스스로 습득해 가는 과정이며, 이러한 것들은 보통 성인과 같은 더 유능한 사람들의 도움을 받는 사회적 상황에서만 습득할 수 있다.", source: "default" },
+            { en: "by clarifying the nature of the old and new perspectives, and by identifying actions on which we might cooperate to move the process along, we can help accelerate the shift", ko: "기존 관점과 새로운 관점의 성격을 분명히 하고, 그 과정을 진전시키기 위해 우리가 협력할 수 있는 행동들을 찾아낸다면, 우리는 그 전환을 가속화하는 데 도움을 줄 수 있다.", source: "default" }
+        ];
 
         const ui = {
-            loginModal: document.getElementById('login-modal'),
-            nicknameInput: document.getElementById('user-nickname'),
-            startBtn: document.getElementById('start-btn'),
-            displayName: document.getElementById('display-name'),
-            scoreDisplay: document.getElementById('score-display'),
-            translation: document.getElementById('translation'),
-            answerZone: document.getElementById('answer-zone'),
-            wordPool: document.getElementById('word-pool'),
-            feedback: document.getElementById('feedback'),
-            checkBtn: document.getElementById('check-btn'),
-            nextBtn: document.getElementById('next-btn'),
-            progressBar: document.getElementById('progress-bar'),
-            rankList: document.getElementById('rank-list')
+            loginModal: document.getElementById("login-modal"),
+            nicknameInput: document.getElementById("user-nickname"),
+            startBtn: document.getElementById("start-btn"),
+            displayName: document.getElementById("display-name"),
+            scoreDisplay: document.getElementById("score-display"),
+            translation: document.getElementById("translation"),
+            answerZone: document.getElementById("answer-zone"),
+            wordPool: document.getElementById("word-pool"),
+            feedback: document.getElementById("feedback"),
+            checkBtn: document.getElementById("check-btn"),
+            nextBtn: document.getElementById("next-btn"),
+            progressBar: document.getElementById("progress-bar"),
+            rankList: document.getElementById("rank-list"),
+            teacherCheck: document.getElementById("teacher-check"),
+            teacherPassword: document.getElementById("teacher-password"),
+            adminBtn: document.getElementById("admin-btn")
         };
 
+        ui.teacherCheck.onchange = () => {
+            if (ui.teacherCheck.checked) {
+                ui.teacherPassword.classList.remove("hidden");
+            } else {
+                ui.teacherPassword.classList.add("hidden");
+                ui.teacherPassword.value = "";
+            }
+        };
+
+        function sanitizeText(text) {
+            return String(text || "").trim();
+        }
+
+        function updateTeacherUI() {
+            if (isTeacher) {
+                ui.adminBtn.classList.remove("hidden");
+            } else {
+                ui.adminBtn.classList.add("hidden");
+                document.getElementById("admin-modal").classList.remove("active");
+            }
+        }
+
+        function setActiveMainMode(mode) {
+            currentMode = mode;
+
+            const allBtn = document.getElementById("load-all-btn");
+            const myBtn = document.getElementById("load-my-btn");
+
+            if (mode === "all") {
+                allBtn.className = "px-4 py-3 rounded-2xl bg-indigo-600 text-white font-black hover:bg-indigo-700 transition-all";
+                myBtn.className = "px-4 py-3 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all";
+            } else {
+                myBtn.className = "px-4 py-3 rounded-2xl bg-indigo-600 text-white font-black hover:bg-indigo-700 transition-all";
+                allBtn.className = "px-4 py-3 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all";
+            }
+
+            refreshQuizSource();
+        }
+
+        function setActiveAdminMode(mode) {
+            adminViewMode = mode;
+
+            const allBtn = document.getElementById("admin-show-all-btn");
+            const myBtn = document.getElementById("admin-show-my-btn");
+
+            if (mode === "all") {
+                allBtn.className = "px-4 py-3 rounded-2xl bg-indigo-600 text-white font-black hover:bg-indigo-700 transition-all";
+                myBtn.className = "px-4 py-3 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all";
+            } else {
+                myBtn.className = "px-4 py-3 rounded-2xl bg-indigo-600 text-white font-black hover:bg-indigo-700 transition-all";
+                allBtn.className = "px-4 py-3 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all";
+            }
+
+            updateAdminList();
+        }
+
+        function refreshQuizSource() {
+            if (currentMode === "my") {
+                quizzes = myQuizzes.length > 0 ? [...myQuizzes] : [];
+            } else {
+                quizzes = [...defaultQuizzes, ...publicQuizzes];
+            }
+
+            if (currentIdx >= quizzes.length) currentIdx = 0;
+            loadQuiz();
+        }
+
         ui.startBtn.onclick = async () => {
-            const nickname = ui.nicknameInput.value.trim();
+            const nickname = sanitizeText(ui.nicknameInput.value);
             if (!nickname) {
                 alert("이름을 입력해야 점수가 저장됩니다!");
                 return;
+            }
+
+            const tryingTeacher = ui.teacherCheck.checked;
+            const inputTeacherPassword = sanitizeText(ui.teacherPassword.value);
+
+            if (tryingTeacher) {
+                if (!inputTeacherPassword) {
+                    alert("교사 비밀번호를 입력하세요.");
+                    return;
+                }
+                if (inputTeacherPassword !== TEACHER_PASSWORD) {
+                    alert("교사 비밀번호가 올바르지 않습니다.");
+                    return;
+                }
+                isTeacher = true;
+            } else {
+                isTeacher = false;
             }
 
             ui.startBtn.disabled = true;
@@ -209,16 +341,17 @@
 
             try {
                 const cred = await signInAnonymously(auth);
-                const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', cred.user.uid);
+                const userRef = doc(db, "artifacts", appId, "public", "data", "users", cred.user.uid);
 
                 await setDoc(userRef, {
-                    nickname: nickname,
+                    nickname,
                     score: 0,
+                    isTeacher,
                     lastUpdated: Date.now()
                 }, { merge: true });
 
-                ui.loginModal.classList.remove('active');
-                loadQuiz();
+                ui.loginModal.classList.remove("active");
+                updateTeacherUI();
             } catch (e) {
                 console.error(e);
                 alert("접속 실패: Firebase 설정을 확인하세요.");
@@ -228,87 +361,116 @@
         };
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
+            if (!user) return;
 
-                onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid), (snap) => {
+            currentUser = user;
+
+            onSnapshot(
+                doc(db, "artifacts", appId, "public", "data", "users", user.uid),
+                (snap) => {
                     if (snap.exists()) {
                         const data = snap.data();
-                        ui.displayName.innerText = data.nickname;
-                        ui.scoreDisplay.innerText = data.score;
-                        document.getElementById('user-avatar').innerText = data.nickname.charAt(0);
+                        ui.displayName.innerText = data.nickname || "사용자";
+                        ui.scoreDisplay.innerText = data.score || 0;
+                        document.getElementById("user-avatar").innerText = (data.nickname || "U").charAt(0);
+                        isTeacher = !!data.isTeacher;
+                        updateTeacherUI();
                     }
-                });
+                }
+            );
 
-                setupSync();
-            }
+            setupSync();
         });
 
         function setupSync() {
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'quizzes'), (snap) => {
+            const publicQuizQuery = query(
+                collection(db, "artifacts", appId, "public", "data", "quizzes"),
+                orderBy("createdAt", "asc")
+            );
+
+            onSnapshot(publicQuizQuery, (snap) => {
                 const cloudQuizzes = [];
-                snap.forEach(d => cloudQuizzes.push({ id: d.id, ...d.data() }));
-
-                if (cloudQuizzes.length > 0) {
-                    quizzes = cloudQuizzes.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                }
-
-                loadQuiz();
+                snap.forEach((d) => cloudQuizzes.push({ id: d.id, ...d.data() }));
+                publicQuizzes = cloudQuizzes;
+                refreshQuizSource();
                 updateAdminList();
             });
 
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'users'), (snap) => {
+            const myQuizQuery = query(
+                collection(db, "artifacts", appId, "private", "users", currentUser.uid, "my_quizzes"),
+                orderBy("createdAt", "asc")
+            );
+
+            onSnapshot(myQuizQuery, (snap) => {
+                const mine = [];
+                snap.forEach((d) => mine.push({ id: d.id, ...d.data() }));
+                myQuizzes = mine;
+                refreshQuizSource();
+                updateAdminList();
+            });
+
+            onSnapshot(collection(db, "artifacts", appId, "public", "data", "users"), (snap) => {
                 const users = [];
-                snap.forEach(d => users.push({ id: d.id, ...d.data() }));
-                users.sort((a, b) => b.score - a.score);
+                snap.forEach((d) => users.push({ id: d.id, ...d.data() }));
+                users.sort((a, b) => (b.score || 0) - (a.score || 0));
 
                 ui.rankList.innerHTML = users.map((u, i) => `
                     <div class="flex justify-between items-center p-4 ${u.id === currentUser?.uid ? 'bg-indigo-50 border border-indigo-200 ring-4 ring-indigo-500/10' : 'bg-slate-50'} rounded-2xl transition-all">
                         <div class="flex items-center gap-4">
                             <span class="text-lg font-black ${i < 3 ? 'text-indigo-600' : 'text-slate-300'}">${i + 1}</span>
-                            <span class="font-bold text-slate-700">${u.nickname} ${u.id === currentUser?.uid ? '(나)' : ''}</span>
+                            <span class="font-bold text-slate-700">${u.nickname || '이름없음'} ${u.id === currentUser?.uid ? '(나)' : ''}</span>
                         </div>
-                        <span class="font-black text-indigo-600">${u.score}점</span>
+                        <span class="font-black text-indigo-600">${u.score || 0}점</span>
                     </div>
-                `).join('');
+                `).join("");
             });
         }
 
         function loadQuiz() {
-            if (!currentUser || quizzes.length === 0) return;
+            if (!currentUser) return;
+
+            if (quizzes.length === 0) {
+                ui.translation.innerText = currentMode === "my" ? "아직 내 문장이 없습니다. AI로 먼저 생성해보세요." : "문장 데이터가 없습니다.";
+                ui.answerZone.innerHTML = "";
+                ui.wordPool.innerHTML = "";
+                ui.progressBar.style.width = "0%";
+                document.getElementById("level-badge").innerText = "NO DATA";
+                ui.feedback.style.opacity = "0";
+                return;
+            }
 
             const quiz = quizzes[currentIdx % quizzes.length];
-            ui.translation.innerText = quiz.ko;
+            ui.translation.innerText = quiz.ko || "";
             ui.progressBar.style.width = `${((currentIdx + 1) / quizzes.length) * 100}%`;
-            document.getElementById('level-badge').innerText = `SENTENCE ${currentIdx + 1} / ${quizzes.length}`;
+            document.getElementById("level-badge").innerText = `SENTENCE ${currentIdx + 1} / ${quizzes.length}`;
 
-            ui.answerZone.innerHTML = '';
-            ui.answerZone.classList.remove('correct', 'incorrect');
-            ui.feedback.style.opacity = '0';
-            ui.nextBtn.classList.add('hidden');
-            ui.checkBtn.classList.remove('hidden');
+            ui.answerZone.innerHTML = "";
+            ui.answerZone.classList.remove("correct", "incorrect");
+            ui.feedback.style.opacity = "0";
+            ui.nextBtn.classList.add("hidden");
+            ui.checkBtn.classList.remove("hidden");
             selectedWords = [];
 
-            const words = quiz.en.split(/\s+/).filter(w => w.length > 0);
+            const words = sanitizeText(quiz.en).split(/\s+/).filter(Boolean);
             const shuffled = [...words].sort(() => Math.random() - 0.5);
 
-            ui.wordPool.innerHTML = '';
+            ui.wordPool.innerHTML = "";
             shuffled.forEach((word) => {
-                const btn = document.createElement('div');
-                btn.className = 'word-tile bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-5 py-4 rounded-[1.2rem] font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 active:scale-90 transition-all';
+                const btn = document.createElement("div");
+                btn.className = "word-tile bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-5 py-4 rounded-[1.2rem] font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 active:scale-90 transition-all";
                 btn.innerText = word;
 
                 btn.onclick = () => {
-                    if (btn.classList.contains('selected')) return;
+                    if (btn.classList.contains("selected")) return;
 
-                    btn.classList.add('selected');
+                    btn.classList.add("selected");
 
-                    const tile = document.createElement('div');
-                    tile.className = 'word-tile bg-indigo-600 text-white px-5 py-4 rounded-[1.2rem] font-bold shadow-lg shadow-indigo-200 animate-in fade-in zoom-in duration-200';
+                    const tile = document.createElement("div");
+                    tile.className = "word-tile bg-indigo-600 text-white px-5 py-4 rounded-[1.2rem] font-bold shadow-lg shadow-indigo-200";
                     tile.innerText = word;
 
                     tile.onclick = () => {
-                        btn.classList.remove('selected');
+                        btn.classList.remove("selected");
                         tile.remove();
                         selectedWords = selectedWords.filter(item => item.tile !== tile);
                     };
@@ -322,46 +484,48 @@
         }
 
         ui.checkBtn.onclick = async () => {
-            if (selectedWords.length === 0) return;
+            if (selectedWords.length === 0 || quizzes.length === 0) return;
 
-            const userSentence = selectedWords.map(w => w.word.toLowerCase().replace(/[.,!?;]/g, "")).join(' ');
-            const correctSentence = quizzes[currentIdx % quizzes.length].en.toLowerCase().replace(/[.,!?;]/g, "").trim();
+            const userSentence = selectedWords.map(w => w.word.toLowerCase().replace(/[.,!?;]/g, "")).join(" ");
+            const correctSentence = sanitizeText(quizzes[currentIdx % quizzes.length].en).toLowerCase().replace(/[.,!?;]/g, "");
 
             if (userSentence === correctSentence) {
                 ui.feedback.innerText = "정답입니다! +10점 저장 중...";
                 ui.feedback.className = "mt-8 text-center font-black text-xl text-emerald-500 opacity-100";
-                ui.answerZone.classList.add('correct');
+                ui.answerZone.classList.add("correct");
 
-                if (currentUser) {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid), {
-                        score: increment(10),
-                        lastUpdated: Date.now()
-                    });
-                }
+                await updateDoc(doc(db, "artifacts", appId, "public", "data", "users", currentUser.uid), {
+                    score: increment(10),
+                    lastUpdated: Date.now()
+                });
 
-                ui.checkBtn.classList.add('hidden');
-                ui.nextBtn.classList.remove('hidden');
+                ui.checkBtn.classList.add("hidden");
+                ui.nextBtn.classList.remove("hidden");
             } else {
                 ui.feedback.innerText = "다시 한번 확인해보세요!";
                 ui.feedback.className = "mt-8 text-center font-black text-xl text-red-500 opacity-100";
-                ui.answerZone.classList.add('incorrect');
-                setTimeout(() => ui.answerZone.classList.remove('incorrect'), 800);
+                ui.answerZone.classList.add("incorrect");
+                setTimeout(() => ui.answerZone.classList.remove("incorrect"), 800);
             }
         };
 
         ui.nextBtn.onclick = () => {
+            if (quizzes.length === 0) return;
             currentIdx = (currentIdx + 1) % quizzes.length;
             loadQuiz();
         };
 
-        document.getElementById('generate-ai-btn').onclick = async () => {
-            const prompt = document.getElementById('ai-prompt').value.trim();
-            if (!prompt) return alert("프롬프트를 입력하세요.");
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("여기에")) {
-                return alert("Gemini API 키를 입력하세요.");
+        document.getElementById("generate-ai-btn").onclick = async () => {
+            if (!isTeacher) {
+                alert("교사만 사용할 수 있습니다.");
+                return;
             }
 
-            const btn = document.getElementById('generate-ai-btn');
+            const prompt = sanitizeText(document.getElementById("ai-prompt").value);
+            if (!prompt) return alert("프롬프트를 입력하세요.");
+            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("여기에")) return alert("Gemini API 키를 입력하세요.");
+
+            const btn = document.getElementById("generate-ai-btn");
             btn.disabled = true;
             btn.innerText = "생성 중...";
 
@@ -369,8 +533,8 @@
                 const response = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
                     {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             contents: [
                                 {
@@ -416,7 +580,7 @@ Format:
                 let items;
                 try {
                     items = JSON.parse(text);
-                } catch (parseError) {
+                } catch (err) {
                     console.error("JSON parse error:", text);
                     throw new Error("JSON 형식으로 변환하지 못했습니다.");
                 }
@@ -425,30 +589,52 @@ Format:
                     throw new Error("응답이 배열 형식이 아닙니다.");
                 }
 
-                const validItems = items.filter(item =>
-                    item &&
-                    typeof item.en === 'string' &&
-                    typeof item.ko === 'string' &&
-                    item.en.trim() &&
-                    item.ko.trim()
-                );
+                const validItems = items
+                    .filter(item => item && typeof item.en === "string" && typeof item.ko === "string")
+                    .map(item => ({
+                        en: sanitizeText(item.en),
+                        ko: sanitizeText(item.ko)
+                    }))
+                    .filter(item => item.en && item.ko);
 
                 if (validItems.length === 0) {
                     throw new Error("유효한 문장 데이터가 없습니다.");
                 }
 
+                const publicCol = collection(db, "artifacts", appId, "public", "data", "quizzes");
+                const privateCol = collection(db, "artifacts", appId, "private", "users", currentUser.uid, "my_quizzes");
+
                 const batch = writeBatch(db);
-                validItems.forEach(q => {
-                    const ref = doc(collection(db, 'artifacts', appId, 'public', 'data', 'quizzes'));
-                    batch.set(ref, {
-                        en: q.en.trim(),
-                        ko: q.ko.trim(),
-                        createdAt: Date.now()
+                const nickname = ui.displayName.innerText || "사용자";
+
+                validItems.forEach((q) => {
+                    const timestamp = Date.now();
+
+                    const publicRef = doc(publicCol);
+                    batch.set(publicRef, {
+                        en: q.en,
+                        ko: q.ko,
+                        createdAt: timestamp,
+                        ownerUid: currentUser.uid,
+                        ownerName: nickname,
+                        source: "ai"
+                    });
+
+                    const privateRef = doc(privateCol);
+                    batch.set(privateRef, {
+                        en: q.en,
+                        ko: q.ko,
+                        createdAt: timestamp,
+                        ownerUid: currentUser.uid,
+                        ownerName: nickname,
+                        source: "ai",
+                        publicLinked: true
                     });
                 });
 
                 await batch.commit();
-                document.getElementById('ai-prompt').value = "";
+
+                document.getElementById("ai-prompt").value = "";
                 alert("AI 문장 생성 완료!");
             } catch (e) {
                 console.error(e);
@@ -459,32 +645,99 @@ Format:
             }
         };
 
-        function updateAdminList() {
-            const list = document.getElementById('admin-quiz-list');
-
-            list.innerHTML = quizzes.map(q => `
-                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div class="text-sm">
-                        <p class="font-black text-indigo-600">${q.en}</p>
-                        <p class="text-slate-400 font-bold">${q.ko}</p>
-                    </div>
-                    <button onclick="window.delQuiz('${q.id || ''}')" class="p-2 text-red-400 hover:text-red-600 font-black">삭제</button>
-                </div>
-            `).join('');
+        function getAdminListSource() {
+            return adminViewMode === "my" ? myQuizzes : [...defaultQuizzes, ...publicQuizzes];
         }
 
-        window.delQuiz = async (id) => {
+        function formatDate(ts) {
+            if (!ts) return "-";
+            const d = new Date(ts);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            const hh = String(d.getHours()).padStart(2, "0");
+            const mi = String(d.getMinutes()).padStart(2, "0");
+            return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+        }
+
+        function updateAdminList() {
+            const list = document.getElementById("admin-quiz-list");
+            const target = getAdminListSource();
+
+            if (target.length === 0) {
+                list.innerHTML = `<div class="p-6 rounded-2xl bg-slate-50 text-slate-400 font-bold text-center">표시할 문장이 없습니다.</div>`;
+                return;
+            }
+
+            list.innerHTML = target.map(q => `
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="flex justify-between items-start gap-4">
+                        <div class="text-sm flex-1">
+                            <p class="font-black text-indigo-600 break-words">${q.en || ""}</p>
+                            <p class="text-slate-500 font-bold mt-1 break-words">${q.ko || ""}</p>
+                            <div class="mt-3 text-xs text-slate-400 space-y-1">
+                                <p>생성자: ${q.ownerName || "기본문장"}</p>
+                                <p>유형: ${q.source || "default"}</p>
+                                <p>생성시각: ${formatDate(q.createdAt)}</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            ${q.id ? `<button onclick="window.delQuiz('${q.id}', '${adminViewMode}')" class="p-2 text-red-400 hover:text-red-600 font-black">삭제</button>` : ""}
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        window.delQuiz = async (id, mode) => {
+            if (!isTeacher) {
+                alert("교사만 삭제할 수 있습니다.");
+                return;
+            }
+
             if (!id) return;
-            if (confirm("삭제할까요?")) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'quizzes', id));
+            if (!confirm("삭제할까요?")) return;
+
+            try {
+                if (mode === "my") {
+                    await deleteDoc(doc(db, "artifacts", appId, "private", "users", currentUser.uid, "my_quizzes", id));
+                } else {
+                    await deleteDoc(doc(db, "artifacts", appId, "public", "data", "quizzes", id));
+                }
+            } catch (e) {
+                console.error(e);
+                alert("삭제 중 오류가 발생했습니다.");
             }
         };
 
-        document.getElementById('rank-btn').onclick = () => document.getElementById('rank-modal').classList.add('active');
-        document.getElementById('rank-close').onclick = () => document.getElementById('rank-modal').classList.remove('active');
-        document.getElementById('admin-btn').onclick = () => document.getElementById('admin-modal').classList.add('active');
-        document.getElementById('admin-close').onclick = () => document.getElementById('admin-modal').classList.remove('active');
-        document.getElementById('reset-btn').onclick = loadQuiz;
+        document.getElementById("rank-btn").onclick = () => document.getElementById("rank-modal").classList.add("active");
+        document.getElementById("rank-close").onclick = () => document.getElementById("rank-modal").classList.remove("active");
+        document.getElementById("admin-btn").onclick = () => {
+            if (!isTeacher) {
+                alert("교사만 접근할 수 있습니다.");
+                return;
+            }
+            document.getElementById("admin-modal").classList.add("active");
+        };
+        document.getElementById("admin-close").onclick = () => document.getElementById("admin-modal").classList.remove("active");
+        document.getElementById("reset-btn").onclick = loadQuiz;
+
+        document.getElementById("load-all-btn").onclick = () => {
+            currentIdx = 0;
+            setActiveMainMode("all");
+        };
+
+        document.getElementById("load-my-btn").onclick = () => {
+            currentIdx = 0;
+            setActiveMainMode("my");
+        };
+
+        document.getElementById("admin-show-all-btn").onclick = () => setActiveAdminMode("all");
+        document.getElementById("admin-show-my-btn").onclick = () => setActiveAdminMode("my");
+
+        setActiveMainMode("all");
+        setActiveAdminMode("all");
+        updateTeacherUI();
     </script>
 </body>
 </html>
