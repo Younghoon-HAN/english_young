@@ -56,12 +56,15 @@
 
             <button
                 id="start-btn"
+                type="button"
                 class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 active:scale-95"
             >
                 학습 시작하기
             </button>
 
             <p class="mt-6 text-xs text-slate-400">입력하신 이름으로 실시간 순위가 기록됩니다.</p>
+
+            <div id="debug-box" class="mt-4 text-left text-xs text-red-500 break-words"></div>
         </div>
     </div>
 
@@ -140,7 +143,7 @@
         </div>
     </div>
 
-    <!-- 관리자/AI 생성 모달 -->
+    <!-- 관리자 모달 -->
     <div id="admin-modal" class="modal">
         <div class="bg-white dark:bg-slate-800 w-full max-w-3xl rounded-[2.5rem] p-10 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-8">
@@ -195,12 +198,11 @@
   	    storageBucket: "english-scramble-a050d.firebasestorage.app",
   	    messagingSenderId: "964570654173",
             appId: "1:964570654173:web:8b531e8daad7d216528234",
-            measurementId: "G-8YQNVVXSJP"Z"
+            measurementId: "G-8YQNVVXSJP"
         };
 
-        const GEMINI_API_KEY = "AIzaSyCvU-VPmaPVPgADqvHLZG8AyADoJdQQ2Q8";
 
-        /* 교사용 비밀번호 */
+        const GEMINI_API_KEY = "AIzaSyCvU-VPmaPVPgADqvHLZG8AyADoJdQQ2Q8";
         const TEACHER_PASSWORD = "1234";
 
         const app = initializeApp(firebaseConfig);
@@ -220,10 +222,7 @@
 
         const defaultQuizzes = [
             { en: "Gazzaniga then asked participants why they chose the card that they did", ko: "Gazzaniga는 그다음 참가자들에게 왜 그들이 그 카드를 선택했는지를 물었다.", source: "default" },
-            { en: "the tariff that protects steelworkers raises the price of the steel that domestic automobile makers need to build their cars", ko: "철강 노동자를 보호하는 관세는 국내 자동차 제조업체들이 자동차를 만들기 위해 필요한 철강의 가격을 상승시킨다.", source: "default" },
-            { en: "our brains experience a sense of reward when we create something new in the process of exploring something uncertain, such as a musical phrase that we have never played or heard before", ko: "우리의 뇌는 한 번도 연주하거나 들어본 적 없는 음악 구절처럼, 불확실한 것을 탐색하는 과정에서 새로운 무언가를 만들어낼 때 보상의 감각을 경험한다.", source: "default" },
-            { en: "mental development consists of individuals increasingly mastering social codes and signals themselves, which they can master only in social situations with the support of more competent individuals, typically adults", ko: "정신 발달이란 개인이 사회적 규범과 신호를 점점 더 스스로 습득해 가는 과정이며, 이러한 것들은 보통 성인과 같은 더 유능한 사람들의 도움을 받는 사회적 상황에서만 습득할 수 있다.", source: "default" },
-            { en: "by clarifying the nature of the old and new perspectives, and by identifying actions on which we might cooperate to move the process along, we can help accelerate the shift", ko: "기존 관점과 새로운 관점의 성격을 분명히 하고, 그 과정을 진전시키기 위해 우리가 협력할 수 있는 행동들을 찾아낸다면, 우리는 그 전환을 가속화하는 데 도움을 줄 수 있다.", source: "default" }
+            { en: "the tariff that protects steelworkers raises the price of the steel that domestic automobile makers need to build their cars", ko: "철강 노동자를 보호하는 관세는 국내 자동차 제조업체들이 자동차를 만들기 위해 필요한 철강의 가격을 상승시킨다.", source: "default" }
         ];
 
         const ui = {
@@ -242,8 +241,38 @@
             rankList: document.getElementById("rank-list"),
             teacherCheck: document.getElementById("teacher-check"),
             teacherPassword: document.getElementById("teacher-password"),
-            adminBtn: document.getElementById("admin-btn")
+            adminBtn: document.getElementById("admin-btn"),
+            debugBox: document.getElementById("debug-box")
         };
+
+        function debug(msg) {
+            console.log(msg);
+            if (ui.debugBox) {
+                ui.debugBox.innerHTML = `<div>${msg}</div>` + ui.debugBox.innerHTML;
+            }
+        }
+
+        window.addEventListener("error", (e) => {
+            console.error("전역 오류:", e.message);
+            debug("스크립트 오류: " + e.message);
+            alert("스크립트 오류: " + e.message);
+        });
+
+        function sanitizeText(text) {
+            return String(text || "").trim();
+        }
+
+        function validateFirebaseConfig() {
+            const missing = [];
+            if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("여기에")) missing.push("apiKey");
+            if (!firebaseConfig.authDomain || firebaseConfig.authDomain.includes("여기에")) missing.push("authDomain");
+            if (!firebaseConfig.projectId || firebaseConfig.projectId.includes("여기에")) missing.push("projectId");
+            if (!firebaseConfig.appId || firebaseConfig.appId.includes("여기에")) missing.push("appId");
+
+            if (missing.length > 0) {
+                throw new Error("Firebase 설정값 누락: " + missing.join(", "));
+            }
+        }
 
         ui.teacherCheck.onchange = () => {
             if (ui.teacherCheck.checked) {
@@ -253,10 +282,6 @@
                 ui.teacherPassword.value = "";
             }
         };
-
-        function sanitizeText(text) {
-            return String(text || "").trim();
-        }
 
         function updateTeacherUI() {
             if (isTeacher) {
@@ -269,7 +294,6 @@
 
         function setActiveMainMode(mode) {
             currentMode = mode;
-
             const allBtn = document.getElementById("load-all-btn");
             const myBtn = document.getElementById("load-my-btn");
 
@@ -313,7 +337,20 @@
         }
 
         ui.startBtn.onclick = async () => {
+            debug("시작 버튼 클릭됨");
+
+            try {
+                validateFirebaseConfig();
+                debug("Firebase 설정 검사 통과");
+            } catch (e) {
+                debug(e.message);
+                alert(e.message);
+                return;
+            }
+
             const nickname = sanitizeText(ui.nicknameInput.value);
+            debug("입력 이름: " + nickname);
+
             if (!nickname) {
                 alert("이름을 입력해야 점수가 저장됩니다!");
                 return;
@@ -332,17 +369,23 @@
                     return;
                 }
                 isTeacher = true;
+                debug("교사 로그인 시도");
             } else {
                 isTeacher = false;
+                debug("학생 로그인 시도");
             }
 
             ui.startBtn.disabled = true;
             ui.startBtn.innerText = "접속 중...";
 
             try {
+                debug("익명 로그인 시작");
                 const cred = await signInAnonymously(auth);
+                debug("익명 로그인 성공: " + cred.user.uid);
+
                 const userRef = doc(db, "artifacts", appId, "public", "data", "users", cred.user.uid);
 
+                debug("Firestore 저장 시작");
                 await setDoc(userRef, {
                     nickname,
                     score: 0,
@@ -350,19 +393,25 @@
                     lastUpdated: Date.now()
                 }, { merge: true });
 
+                debug("Firestore 저장 성공");
                 ui.loginModal.classList.remove("active");
                 updateTeacherUI();
             } catch (e) {
-                console.error(e);
-                alert("접속 실패: Firebase 설정을 확인하세요.");
+                console.error("시작 버튼 오류:", e);
+                debug("로그인/저장 실패: " + (e.message || e));
+                alert("접속 실패: " + (e.message || e));
                 ui.startBtn.disabled = false;
                 ui.startBtn.innerText = "학습 시작하기";
             }
         };
 
         onAuthStateChanged(auth, (user) => {
-            if (!user) return;
+            if (!user) {
+                debug("현재 로그인 사용자 없음");
+                return;
+            }
 
+            debug("onAuthStateChanged 감지: " + user.uid);
             currentUser = user;
 
             onSnapshot(
@@ -375,7 +424,14 @@
                         document.getElementById("user-avatar").innerText = (data.nickname || "U").charAt(0);
                         isTeacher = !!data.isTeacher;
                         updateTeacherUI();
+                        debug("사용자 문서 로드 성공");
+                    } else {
+                        debug("사용자 문서가 아직 없음");
                     }
+                },
+                (error) => {
+                    console.error(error);
+                    debug("사용자 문서 구독 오류: " + error.message);
                 }
             );
 
@@ -394,6 +450,8 @@
                 publicQuizzes = cloudQuizzes;
                 refreshQuizSource();
                 updateAdminList();
+            }, (error) => {
+                debug("공용 문장 구독 오류: " + error.message);
             });
 
             const myQuizQuery = query(
@@ -407,6 +465,8 @@
                 myQuizzes = mine;
                 refreshQuizSource();
                 updateAdminList();
+            }, (error) => {
+                debug("내 문장 구독 오류: " + error.message);
             });
 
             onSnapshot(collection(db, "artifacts", appId, "public", "data", "users"), (snap) => {
@@ -423,6 +483,8 @@
                         <span class="font-black text-indigo-600">${u.score || 0}점</span>
                     </div>
                 `).join("");
+            }, (error) => {
+                debug("사용자 목록 구독 오류: " + error.message);
             });
         }
 
@@ -462,7 +524,6 @@
 
                 btn.onclick = () => {
                     if (btn.classList.contains("selected")) return;
-
                     btn.classList.add("selected");
 
                     const tile = document.createElement("div");
@@ -567,27 +628,14 @@ Format:
                 const data = await response.json();
 
                 if (!response.ok) {
-                    console.error("Gemini API error:", data);
                     throw new Error(data?.error?.message || `HTTP ${response.status}`);
                 }
 
                 const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!text) {
-                    console.error("Unexpected Gemini response:", data);
-                    throw new Error("응답 텍스트가 없습니다.");
-                }
+                if (!text) throw new Error("응답 텍스트가 없습니다.");
 
-                let items;
-                try {
-                    items = JSON.parse(text);
-                } catch (err) {
-                    console.error("JSON parse error:", text);
-                    throw new Error("JSON 형식으로 변환하지 못했습니다.");
-                }
-
-                if (!Array.isArray(items)) {
-                    throw new Error("응답이 배열 형식이 아닙니다.");
-                }
+                const items = JSON.parse(text);
+                if (!Array.isArray(items)) throw new Error("응답이 배열 형식이 아닙니다.");
 
                 const validItems = items
                     .filter(item => item && typeof item.en === "string" && typeof item.ko === "string")
@@ -597,9 +645,7 @@ Format:
                     }))
                     .filter(item => item.en && item.ko);
 
-                if (validItems.length === 0) {
-                    throw new Error("유효한 문장 데이터가 없습니다.");
-                }
+                if (validItems.length === 0) throw new Error("유효한 문장 데이터가 없습니다.");
 
                 const publicCol = collection(db, "artifacts", appId, "public", "data", "quizzes");
                 const privateCol = collection(db, "artifacts", appId, "private", "users", currentUser.uid, "my_quizzes");
@@ -610,8 +656,7 @@ Format:
                 validItems.forEach((q) => {
                     const timestamp = Date.now();
 
-                    const publicRef = doc(publicCol);
-                    batch.set(publicRef, {
+                    batch.set(doc(publicCol), {
                         en: q.en,
                         ko: q.ko,
                         createdAt: timestamp,
@@ -620,8 +665,7 @@ Format:
                         source: "ai"
                     });
 
-                    const privateRef = doc(privateCol);
-                    batch.set(privateRef, {
+                    batch.set(doc(privateCol), {
                         en: q.en,
                         ko: q.ko,
                         createdAt: timestamp,
@@ -633,7 +677,6 @@ Format:
                 });
 
                 await batch.commit();
-
                 document.getElementById("ai-prompt").value = "";
                 alert("AI 문장 생성 완료!");
             } catch (e) {
@@ -738,6 +781,7 @@ Format:
         setActiveMainMode("all");
         setActiveAdminMode("all");
         updateTeacherUI();
+        debug("스크립트 로드 완료");
     </script>
 </body>
 </html>
