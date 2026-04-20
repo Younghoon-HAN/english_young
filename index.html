@@ -577,116 +577,87 @@
         };
 
         document.getElementById("generate-ai-btn").onclick = async () => {
-            if (!isTeacher) {
-                alert("교사만 사용할 수 있습니다.");
-                return;
-            }
+    if (!isTeacher) {
+        alert("교사만 사용할 수 있습니다.");
+        return;
+    }
 
-            const prompt = sanitizeText(document.getElementById("ai-prompt").value);
-            if (!prompt) return alert("프롬프트를 입력하세요.");
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("여기에")) return alert("Gemini API 키를 입력하세요.");
+    const prompt = sanitizeText(document.getElementById("ai-prompt").value);
+    if (!prompt) {
+        alert("프롬프트를 입력하세요.");
+        return;
+    }
 
-            const btn = document.getElementById("generate-ai-btn");
-            btn.disabled = true;
-            btn.innerText = "생성 중...";
+    const btn = document.getElementById("generate-ai-btn");
+    btn.disabled = true;
+    btn.innerText = "생성 중...";
 
-            try {
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            contents: [
-                                {
-                                    parts: [
-                                        {
-                                            text:
-`Generate exactly 5 English sentences using objective relative pronouns (whom, which, that).
-Topic: ${prompt}
+    try {
+        const response = await fetch(FUNCTION_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                prompt,
+                isTeacher,
+            }),
+        });
 
-Return ONLY valid JSON.
-Format:
-[
-  {"en":"English sentence","ko":"Korean translation"},
-  {"en":"English sentence","ko":"Korean translation"},
-  {"en":"English sentence","ko":"Korean translation"},
-  {"en":"English sentence","ko":"Korean translation"},
-  {"en":"English sentence","ko":"Korean translation"}
-]`
-                                        }
-                                    ]
-                                }
-                            ],
-                            generationConfig: {
-                                responseMimeType: "application/json"
-                            }
-                        })
-                    }
-                );
+        const data = await response.json();
 
-                const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data?.error || `HTTP ${response.status}`);
+        }
 
-                if (!response.ok) {
-                    throw new Error(data?.error?.message || `HTTP ${response.status}`);
-                }
+        const validItems = data?.items;
+        if (!Array.isArray(validItems) || validItems.length === 0) {
+            throw new Error("서버에서 유효한 문장을 받지 못했습니다.");
+        }
 
-                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!text) throw new Error("응답 텍스트가 없습니다.");
+        const publicCol = collection(db, "artifacts", appId, "public", "data", "quizzes");
+        const privateCol = collection(db, "artifacts", appId, "private", "users", currentUser.uid, "my_quizzes");
 
-                const items = JSON.parse(text);
-                if (!Array.isArray(items)) throw new Error("응답이 배열 형식이 아닙니다.");
+        const batch = writeBatch(db);
+        const nickname = ui.displayName.innerText || "사용자";
 
-                const validItems = items
-                    .filter(item => item && typeof item.en === "string" && typeof item.ko === "string")
-                    .map(item => ({
-                        en: sanitizeText(item.en),
-                        ko: sanitizeText(item.ko)
-                    }))
-                    .filter(item => item.en && item.ko);
+        validItems.forEach((q) => {
+            const timestamp = Date.now();
 
-                if (validItems.length === 0) throw new Error("유효한 문장 데이터가 없습니다.");
+            const publicRef = doc(publicCol);
+            batch.set(publicRef, {
+                en: q.en,
+                ko: q.ko,
+                createdAt: timestamp,
+                ownerUid: currentUser.uid,
+                ownerName: nickname,
+                source: "ai"
+            });
 
-                const publicCol = collection(db, "artifacts", appId, "public", "data", "quizzes");
-                const privateCol = collection(db, "artifacts", appId, "private", "users", currentUser.uid, "my_quizzes");
+            const privateRef = doc(privateCol);
+            batch.set(privateRef, {
+                en: q.en,
+                ko: q.ko,
+                createdAt: timestamp,
+                ownerUid: currentUser.uid,
+                ownerName: nickname,
+                source: "ai",
+                publicLinked: true
+            });
+        });
 
-                const batch = writeBatch(db);
-                const nickname = ui.displayName.innerText || "사용자";
+        await batch.commit();
 
-                validItems.forEach((q) => {
-                    const timestamp = Date.now();
-
-                    batch.set(doc(publicCol), {
-                        en: q.en,
-                        ko: q.ko,
-                        createdAt: timestamp,
-                        ownerUid: currentUser.uid,
-                        ownerName: nickname,
-                        source: "ai"
-                    });
-
-                    batch.set(doc(privateCol), {
-                        en: q.en,
-                        ko: q.ko,
-                        createdAt: timestamp,
-                        ownerUid: currentUser.uid,
-                        ownerName: nickname,
-                        source: "ai",
-                        publicLinked: true
-                    });
-                });
-
-                await batch.commit();
-                document.getElementById("ai-prompt").value = "";
-                alert("AI 문장 생성 완료!");
-            } catch (e) {
-                console.error(e);
-                alert(`AI 생성 오류: ${e.message}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "생성";
-            }
-        };
+        document.getElementById("ai-prompt").value = "";
+        alert("AI 문장 생성 완료!");
+    } catch (e) {
+        console.error(e);
+        alert(`AI 생성 오류: ${e.message}`);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "생성";
+    }
+};
 
         function getAdminListSource() {
             return adminViewMode === "my" ? myQuizzes : [...defaultQuizzes, ...publicQuizzes];
